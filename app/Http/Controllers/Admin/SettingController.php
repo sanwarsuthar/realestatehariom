@@ -266,15 +266,20 @@ class SettingController extends Controller
             
             // 6. Reset ALL wallet balances to 0 (including admin wallets)
             // This clears: balance, total_earned, total_withdrawn, total_deposited
+         
+            
+            // 6a. Delete user wallets (keep admin wallets but with zero balance)
+            DB::table('wallets')->whereNotIn('user_id', $adminIds)->delete();
+
+
             DB::table('wallets')->update([
                 'balance' => 0,
                 'total_earned' => 0,
                 'total_withdrawn' => 0,
                 'total_deposited' => 0,
+                'main_balance' => 0,
+                'withdrawable_balance' => 0,
             ]);
-            
-            // 6a. Delete user wallets (keep admin wallets but with zero balance)
-            DB::table('wallets')->whereNotIn('user_id', $adminIds)->delete();
             
             // 7. Delete OTP verifications
             if (DB::getSchemaBuilder()->hasTable('otp_verifications')) {
@@ -349,6 +354,8 @@ class SettingController extends Controller
             // Permanently delete all non-admin users (including soft deleted ones)
             // Using DB facade bypasses soft deletes, so this will delete everything
             DB::table('users')->where('user_type', '!=', 'admin')->delete();
+
+       
             
             // 24. Clear cache
             // Clear Laravel application cache (including dashboard stats cache)
