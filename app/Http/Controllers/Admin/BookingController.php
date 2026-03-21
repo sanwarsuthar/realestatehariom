@@ -190,6 +190,14 @@ class BookingController extends Controller
                     ->orderBy('id', 'asc')
                     ->first();
 
+                $adminPendingTx = DB::table('transactions')
+                    ->where('user_id', 1)
+                    ->where('type', 'commission')
+                    ->where('status', 'pending')
+                    ->where('reference_id', $booking->id)
+                    ->orderBy('id', 'asc')
+                    ->first();
+
                 $project = $booking->plot && $booking->plot->project ? $booking->plot->project : null;
                 $plot = $booking->plot;
                 $desc = "Deal done – commission credited (Booking #{$booking->id})";
@@ -199,6 +207,17 @@ class BookingController extends Controller
 
                 if ($pendingTx) {
                     DB::table('transactions')->where('id', $pendingTx->id)->update([
+                        'status' => 'completed',
+                        'amount' => $finalAmount,
+                        'balance_before' => $withdrawableBefore,
+                        'balance_after' => $withdrawableAfter,
+                        'description' => $desc,
+                        'processed_by' => auth()->id(),
+                        'processed_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } else if ($adminPendingTx) {
+                    DB::table('transactions')->where('id', $adminPendingTx->id)->update([
                         'status' => 'completed',
                         'amount' => $finalAmount,
                         'balance_before' => $withdrawableBefore,
