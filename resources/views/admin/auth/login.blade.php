@@ -11,6 +11,26 @@
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Suppress the production warning
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+                return; // Suppress this specific warning
+            }
+            originalWarn.apply(console, args);
+        };
+    </script>
+    <script>
+        // Fallback: if Tailwind CDN fails to load, inject a CSS build (v2) so UI isn't unstyled
+        if (!window.tailwind) {
+            const fallback = document.createElement('link');
+            fallback.rel = 'stylesheet';
+            fallback.href = 'https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css';
+            document.head.appendChild(fallback);
+        }
+    </script>
 </head>
 <body class="min-h-screen gradient-bg flex items-center justify-center p-4">
     <!-- Background Elements -->
