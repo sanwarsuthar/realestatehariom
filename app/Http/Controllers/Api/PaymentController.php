@@ -20,9 +20,9 @@ class PaymentController extends Controller
             $request = request();
             $baseUrl = $request->getSchemeAndHttpHost();
             
-            // For production, ALWAYS use: https://shrihariomgroup.com/superadmin/
+            // For production, ALWAYS use: https://superadmin.shrihariomgroup.com/
             if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
-                $baseUrl = 'https://shrihariomgroup.com/superadmin';
+                $baseUrl = 'https://superadmin.shrihariomgroup.com';
             }
             
             $paymentMethods = PaymentMethod::where('is_active', true)
@@ -37,7 +37,7 @@ class PaymentController extends Controller
                             $scannerPhotoUrl = $method->scanner_photo;
                         } else {
                             $scannerPhotoUrl = strpos($baseUrl, 'shrihariomgroup.com') !== false
-                                ? 'https://shrihariomgroup.com/superadmin/storage/app/public/' . ltrim($method->scanner_photo, '/')
+                                ? 'https://superadmin.shrihariomgroup.com/storage/app/public/' . ltrim($method->scanner_photo, '/')
                                 : rtrim($baseUrl, '/') . '/storage/' . ltrim($method->scanner_photo, '/');
                         }
                     }
@@ -196,7 +196,7 @@ class PaymentController extends Controller
             $requestObj = request();
             $baseUrl = $requestObj->getSchemeAndHttpHost();
             
-            // For production, ALWAYS use: https://shrihariomgroup.com/superadmin/
+            // For production, ALWAYS use: https://superadmin.shrihariomgroup.com/
             if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
                 $baseUrl = 'https://shrihariomgroup.com/superadmin';
             }
@@ -325,7 +325,7 @@ class PaymentController extends Controller
                             $screenshotUrl = $pr->payment_screenshot;
                         } else {
                             $screenshotUrl = strpos($baseUrl, 'shrihariomgroup.com') !== false
-                                ? 'https://shrihariomgroup.com/superadmin/storage/app/public/' . ltrim($pr->payment_screenshot, '/')
+                                ? 'https://superadmin.shrihariomgroup.com/storage/app/public/' . ltrim($pr->payment_screenshot, '/')
                                 : rtrim($baseUrl, '/') . '/storage/' . ltrim($pr->payment_screenshot, '/');
                         }
                     }

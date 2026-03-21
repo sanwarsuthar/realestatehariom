@@ -22,7 +22,7 @@ class ProjectController extends Controller
             $request = request();
             $baseUrl = $request->getSchemeAndHttpHost();
             
-            // For production, ALWAYS use: https://shrihariomgroup.com/superadmin/
+            // For production, ALWAYS use: https://superadmin.shrihariomgroup.com/
             if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
                 $baseUrl = 'https://shrihariomgroup.com/superadmin';
             }
@@ -42,11 +42,11 @@ class ProjectController extends Controller
                             if (empty($imageUrl)) return $imageUrl;
                             
                             // If URL is relative (starts with /storage), make it absolute
-                            // Convert /storage/projects/... to https://shrihariomgroup.com/superadmin/storage/app/public/projects/...
+                            // Convert /storage/projects/... to https://superadmin.shrihariomgroup.com/storage/app/public/projects/...
                             if (strpos($imageUrl, '/storage/') === 0) {
                                 if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
                                     // Production: always use shrihariomgroup.com/superadmin
-                                    return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($imageUrl, 8);
+                                    return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($imageUrl, 8);
                                 } else {
                                     // Local: use standard /storage/ path
                                     return rtrim($baseUrl, '/') . $imageUrl;
@@ -59,7 +59,7 @@ class ProjectController extends Controller
                                 $path = $parsedUrl['path'] ?? '';
                                 if (strpos($path, '/storage/') === 0) {
                                     if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
-                                        return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($path, 8);
+                                        return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($path, 8);
                                     } else {
                                         return rtrim($baseUrl, '/') . $path;
                                     }
@@ -85,7 +85,7 @@ class ProjectController extends Controller
                                 
                                 // If we found a file path, ALWAYS return shrihariomgroup.com/superadmin format
                                 if (!empty($filePath)) {
-                                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                                 }
                                 
                                 return $imageUrl;
@@ -185,15 +185,15 @@ class ProjectController extends Controller
                                 }
                                 
                                 if (!empty($filePath)) {
-                                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                                 }
                                 
                                 return $pdfUrl;
                             })($project->floor_plan_pdf)
                             : (strpos($baseUrl, 'shrihariomgroup.com') !== false
                                 ? (strpos($project->floor_plan_pdf, '/storage/') === 0
-                                    ? 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($project->floor_plan_pdf, 8)
-                                    : 'https://shrihariomgroup.com/superadmin/storage/app/public/' . ltrim($project->floor_plan_pdf, '/'))
+                                    ? 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($project->floor_plan_pdf, 8)
+                                    : 'https://superadmin.shrihariomgroup.com/storage/app/public/' . ltrim($project->floor_plan_pdf, '/'))
                                 : rtrim($baseUrl, '/') . $project->floor_plan_pdf)
                     ) : null,
                     'status' => $project->status,
@@ -223,7 +223,7 @@ class ProjectController extends Controller
             $request = request();
             $baseUrl = $request->getSchemeAndHttpHost();
             
-            // For production, ALWAYS use: https://shrihariomgroup.com/superadmin/
+            // For production, ALWAYS use: https://superadmin.shrihariomgroup.com/
             if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
                 $baseUrl = 'https://shrihariomgroup.com/superadmin';
             }
@@ -247,11 +247,11 @@ class ProjectController extends Controller
                     if (empty($imageUrl)) return $imageUrl;
                     
                     // If URL is relative (starts with /storage), make it absolute
-                    // Convert /storage/projects/... to https://shrihariomgroup.com/superadmin/storage/app/public/projects/...
+                    // Convert /storage/projects/... to https://superadmin.shrihariomgroup.com/storage/app/public/projects/...
                     if (strpos($imageUrl, '/storage/') === 0) {
                         if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
                             // Production: always use shrihariomgroup.com/superadmin
-                            return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($imageUrl, 8);
+                            return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($imageUrl, 8);
                         } else {
                             // Local: use standard /storage/ path
                             return rtrim($baseUrl, '/') . $imageUrl;
@@ -264,7 +264,7 @@ class ProjectController extends Controller
                         $path = $parsedUrl['path'] ?? '';
                         if (strpos($path, '/storage/') === 0) {
                             if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
-                                return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($path, 8);
+                                return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($path, 8);
                             } else {
                                 return rtrim($baseUrl, '/') . $path;
                             }
@@ -290,7 +290,7 @@ class ProjectController extends Controller
                         
                         // If we found a file path, ALWAYS return shrihariomgroup.com/superadmin format
                         if (!empty($filePath)) {
-                            return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                            return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                         }
                         
                         return $imageUrl;
@@ -358,15 +358,15 @@ class ProjectController extends Controller
                                 }
                                 
                                 if (!empty($filePath)) {
-                                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                                 }
                                 
                                 return $pdfUrl;
                             })($project->floor_plan_pdf)
                             : (strpos($baseUrl, 'shrihariomgroup.com') !== false
                                 ? (strpos($project->floor_plan_pdf, '/storage/') === 0
-                                    ? 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($project->floor_plan_pdf, 8)
-                                    : 'https://shrihariomgroup.com/superadmin/storage/app/public/' . ltrim($project->floor_plan_pdf, '/'))
+                                    ? 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($project->floor_plan_pdf, 8)
+                                    : 'https://superadmin.shrihariomgroup.com/storage/app/public/' . ltrim($project->floor_plan_pdf, '/'))
                                 : rtrim($baseUrl, '/') . $project->floor_plan_pdf)
                     ) : null,
                     'status' => $project->status,

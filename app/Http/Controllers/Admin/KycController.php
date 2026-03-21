@@ -142,7 +142,7 @@ class KycController extends Controller
             ->findOrFail($id);
 
         // Helper function to convert image paths to correct format
-        // Format: https://shrihariomgroup.com/superadmin/storage/app/public/kyc/... (production)
+        // Format: https://superadmin.shrihariomgroup.com/storage/app/public/kyc/... (production)
         // Format: http://localhost:8000/storage/app/public/kyc/... (local)
         $convertImagePath = function($imagePath) {
             if (empty($imagePath)) {
@@ -153,7 +153,7 @@ class KycController extends Controller
             $filePath = null;
             
             if (str_starts_with($imagePath, 'http')) {
-                // Handle format: https://shrihariomgroup.com/superadmin/storage/app/public/kyc/...
+                // Handle format: https://superadmin.shrihariomgroup.com/storage/app/public/kyc/...
                 if (strpos($imagePath, '/storage/app/public/') !== false) {
                     $parts = explode('/storage/app/public/', $imagePath, 2);
                     $filePath = $parts[1] ?? null;
@@ -178,7 +178,7 @@ class KycController extends Controller
                 $baseUrl = config('app.url');
                 // For production, use the specific format
                 if (strpos($baseUrl, 'shrihariomgroup.com') !== false || strpos($baseUrl, 'superadmin') !== false) {
-                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                 }
                 // For local development
                 return rtrim($baseUrl, '/') . '/storage/app/public/' . $filePath;
@@ -189,7 +189,7 @@ class KycController extends Controller
                 $filePath = substr($imagePath, 9);
                 $baseUrl = config('app.url');
                 if (strpos($baseUrl, 'shrihariomgroup.com') !== false || strpos($baseUrl, 'superadmin') !== false) {
-                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                 }
                 return rtrim($baseUrl, '/') . '/storage/app/public/' . $filePath;
             }

@@ -46,9 +46,9 @@ Route::get('/dashboard', function () {
     
     // Get recent projects
     $baseUrl = request()->getSchemeAndHttpHost();
-    // For production, ALWAYS use: https://shrihariomgroup.com/superadmin/
+    // For production, ALWAYS use: https://superadmin.shrihariomgroup.com/
     if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
-        $baseUrl = 'https://shrihariomgroup.com/superadmin';
+        $baseUrl = 'https://superadmin.shrihariomgroup.com';
     }
     $recentProjects = \App\Models\Project::where('is_active', true)
         ->withCount(['plots' => function($query) {
@@ -65,11 +65,11 @@ Route::get('/dashboard', function () {
                     if (empty($imageUrl)) return $imageUrl;
                     
                     // If URL is relative (starts with /storage), make it absolute
-                    // Convert /storage/projects/... to https://shrihariomgroup.com/superadmin/storage/app/public/projects/...
+                    // Convert /storage/projects/... to https://superadmin.shrihariomgroup.com/storage/app/public/projects/...
                     if (strpos($imageUrl, '/storage/') === 0) {
                         if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
                             // Production: always use shrihariomgroup.com/superadmin
-                            return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($imageUrl, 8);
+                            return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($imageUrl, 8);
                         } else {
                             // Local: use standard /storage/ path
                             return rtrim($baseUrl, '/') . $imageUrl;
@@ -82,7 +82,7 @@ Route::get('/dashboard', function () {
                         $path = $parsedUrl['path'] ?? '';
                         if (strpos($path, '/storage/') === 0) {
                             if (strpos($baseUrl, 'shrihariomgroup.com') !== false) {
-                                return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($path, 8);
+                                return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($path, 8);
                             } else {
                                 return rtrim($baseUrl, '/') . $path;
                             }
@@ -108,7 +108,7 @@ Route::get('/dashboard', function () {
                         
                         // If we found a file path, ALWAYS return shrihariomgroup.com/superadmin format
                         if (!empty($filePath)) {
-                            return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                            return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                         }
                         
                         return $imageUrl;
@@ -437,8 +437,8 @@ Route::get('/dashboard', function () {
     // Get slider images from settings
     $sliderImages = json_decode(\App\Models\Setting::get('home_slider_images', '[]'), true) ?? [];
     
-    // Convert image paths - ALWAYS use: https://shrihariomgroup.com/superadmin/storage/app/public/
-    $baseUrl = 'https://shrihariomgroup.com/superadmin';
+    // Convert image paths - ALWAYS use: https://superadmin.shrihariomgroup.com/storage/app/public/
+    $baseUrl = 'https://superadmin.shrihariomgroup.com/';
     
     $sliderImages = array_map(function($imagePath) use ($baseUrl) {
         // If it's a full URL (from old data), convert it

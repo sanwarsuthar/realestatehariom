@@ -57,14 +57,14 @@ class KycController extends Controller
                             $parts = explode('/storage/', $imagePath, 2);
                             $filePath = $parts[1] ?? '';
                         }
-                        return !empty($filePath) ? 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath : $imagePath;
+                        return !empty($filePath) ? 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath : $imagePath;
                     }
                     return $imagePath;
                 }
                 
                 // If relative path (starts with /storage/), convert to full URL
                 if (strpos($imagePath, '/storage/') === 0) {
-                    return 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($imagePath, 8);
+                    return 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($imagePath, 8);
                 }
                 
                 return $imagePath;
@@ -161,7 +161,7 @@ class KycController extends Controller
             $kycDocument->save();
 
             // Convert to full URL - ALWAYS use shrihariomgroup.com/superadmin format
-            $fullImageUrl = 'https://shrihariomgroup.com/superadmin/storage/app/public' . substr($imagePath, 8);
+            $fullImageUrl = 'https://superadmin.shrihariomgroup.com/storage/app/public' . substr($imagePath, 8);
             
             return response()->json([
                 'success' => true,

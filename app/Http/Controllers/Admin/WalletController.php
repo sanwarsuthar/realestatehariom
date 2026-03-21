@@ -72,6 +72,8 @@ class WalletController extends Controller
 
         $withdrawals = $query->orderBy('created_at', 'desc')->paginate(20);
 
+   
+
         $statusOptions = ['pending', 'completed', 'failed', 'cancelled'];
 
         return view('admin.wallet.withdrawals', compact('withdrawals', 'statusOptions'));

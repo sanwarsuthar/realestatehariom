@@ -99,7 +99,7 @@
                                 <div class="flex space-x-2">
                                     @php
                                         // Helper function to convert image paths to correct format
-                                        // Format: https://shrihariomgroup.com/superadmin/storage/app/public/kyc/... (production)
+                                        // Format: https://superadmin.shrihariomgroup.com/storage/app/public/kyc/... (production)
                                         // Format: http://localhost:8000/storage/app/public/kyc/... (local)
                                         $convertImagePath = function($imagePath) {
                                             if (empty($imagePath)) {
@@ -110,7 +110,7 @@
                                             $filePath = null;
                                             
                                             if (str_starts_with($imagePath, 'http')) {
-                                                // Handle format: https://shrihariomgroup.com/superadmin/storage/app/public/kyc/...
+                                                // Handle format: https://superadmin.shrihariomgroup.com/storage/app/public/kyc/...
                                                 if (strpos($imagePath, '/storage/app/public/') !== false) {
                                                     $parts = explode('/storage/app/public/', $imagePath, 2);
                                                     $filePath = $parts[1] ?? null;
@@ -135,10 +135,10 @@
                                                 $baseUrl = config('app.url');
                                                 // For production, use the specific format
                                                 if (strpos($baseUrl, 'shrihariomgroup.com') !== false || strpos($baseUrl, 'superadmin') !== false) {
-                                                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                                                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                                                 }
                                                 // For local development
-                                                return rtrim($baseUrl, '/') . '/storage/app/public/' . $filePath;
+                                                return rtrim("https://superadmin.shrihariomgroup.com", '/') . '/storage/app/public/' . $filePath;
                                             }
                                             
                                             // Fallback: if we can't extract, try to use as-is or generate from relative path
@@ -146,9 +146,9 @@
                                                 $filePath = substr($imagePath, 9);
                                                 $baseUrl = config('app.url');
                                                 if (strpos($baseUrl, 'shrihariomgroup.com') !== false || strpos($baseUrl, 'superadmin') !== false) {
-                                                    return 'https://shrihariomgroup.com/superadmin/storage/app/public/' . $filePath;
+                                                    return 'https://superadmin.shrihariomgroup.com/storage/app/public/' . $filePath;
                                                 }
-                                                return rtrim($baseUrl, '/') . '/storage/app/public/' . $filePath;
+                                                return rtrim("https://superadmin.shrihariomgroup.com", '/') . '/storage/app/public/' . $filePath;
                                             }
                                             
                                             return $imagePath;
@@ -248,7 +248,7 @@
 </div>
 
 <!-- View KYC Details Modal -->
-<div id="kycDetailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
+<div id="kycDetailsModal" class="hidden fixed inset-0 bg-gray-600  overflow-y-auto h-full w-full" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-gray-900">KYC Document Details</h3>
