@@ -482,10 +482,12 @@ class AuthController extends Controller
         }
         
         if (!$user && $email) {
-        $user = DB::table('users')
-            ->where('email', $email)
+          $email = strtolower($email);
+        
+          $user = DB::table('users')
+            ->whereRaw('LOWER(email) = ?', [$email])
             ->where('user_type', 'broker')
-                ->whereNull('deleted_at')
+            ->whereNull('deleted_at')
             ->first();
         }
 
