@@ -231,7 +231,7 @@ class BookingController extends Controller
                         'amount' => $finalAmount,
                         'balance_before' => $withdrawableBefore,
                         'balance_after' => $withdrawableAfter,
-                        'description' => $desc,
+                        // 'description' => $desc,
                         'processed_by' => auth()->id(),
                         'processed_at' => now(),
                         'updated_at' => now(),

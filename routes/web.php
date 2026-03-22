@@ -27,6 +27,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/users/{user}/change-password', [App\Http\Controllers\Admin\UserController::class, 'changePassword'])->name('admin.users.change-password');
         Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.users.destroy');
         Route::put('/users/{user}/referral-code', [App\Http\Controllers\Admin\UserController::class, 'updateReferralCode'])->name('admin.users.referral-code.update');
+        Route::post('/users/{user}/withdraw', [App\Http\Controllers\Admin\UserController::class, 'withdrawAdminAmount'])->name('admin.users.withdraw');
         Route::get('/users-graph', [App\Http\Controllers\Admin\UserGraphController::class, 'index'])->name('admin.users.graph');
         Route::get('/users-graph/data', [App\Http\Controllers\Admin\UserGraphController::class, 'getTreeData'])->name('admin.users.graph.data');
         Route::get('/slab-upgrades', [App\Http\Controllers\Admin\UserController::class, 'slabUpgrades'])->name('admin.slab-upgrades');

@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Slab;
 use App\Models\SlabUpgrade;
 use App\Models\PropertyType;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -706,6 +708,76 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'Failed to create user: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function withdrawAdminAmount(Request $request, User $user)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        if ($user->user_type !== 'admin') {
+            return redirect()
+                ->back()
+                ->with('error', 'Withdrawal is allowed only for admin users.');
+        }
+
+        $wallet = $user->wallet;
+        if (!$wallet) {
+            return redirect()
+                ->back()
+                ->with('error', 'Wallet not found for this admin user.');
+        }
+
+        $amount = round((float) $request->amount, 2);
+        $withdrawableBefore = (float) ($wallet->withdrawable_balance ?? 0);
+
+        if ($amount > $withdrawableBefore) {
+            return redirect()
+                ->back()
+                ->with('error', 'Insufficient withdrawable balance. Available: ₹' . number_format($withdrawableBefore, 2));
+        }
+
+        try {
+            DB::transaction(function () use ($user, $wallet, $amount, $withdrawableBefore) {
+                $withdrawableAfter = $withdrawableBefore - $amount;
+
+                Transaction::create([
+                    'user_id' => $user->id,
+                    'transaction_id' => 'WTHADM' . strtoupper(Str::random(6)) . time(),
+                    'type' => 'withdrawal',
+                    'status' => 'completed',
+                    'amount' => $amount,
+                    'balance_before' => $withdrawableBefore,
+                    'balance_after' => $withdrawableAfter,
+                    'description' => 'Manual admin withdrawal from user details page',
+                    'processed_by' => auth()->id(),
+                    'processed_at' => now(),
+                    'metadata' => [
+                        'source' => 'admin_user_details_page',
+                        'executed_by' => auth()->id(),
+                    ],
+                ]);
+
+                $wallet->decrement('withdrawable_balance', $amount);
+                $wallet->decrement('main_balance', $amount);
+                $wallet->increment('total_withdrawn', $amount);
+            });
+
+            return redirect()
+                ->back()
+                ->with('success', 'Amount withdrawn successfully.');
+        } catch (\Throwable $e) {
+            \Log::error('Admin manual withdrawal failed: ' . $e->getMessage(), [
+                'admin_user_id' => $user->id,
+                'amount' => $amount,
+                'performed_by' => auth()->id(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to process withdrawal. Please try again.');
         }
     }
 

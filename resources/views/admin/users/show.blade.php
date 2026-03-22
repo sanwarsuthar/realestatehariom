@@ -69,6 +69,14 @@
                 <a href="{{ route('admin.users') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700">
                     <i class="fas fa-arrow-left mr-2"></i> Back to Users
                 </a>
+                @if($user->user_type === 'admin')
+                    <button type="button" id="openWithdrawModalBtn" class="mt-3 inline-flex items-center px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                        <i class="fas fa-wallet mr-2"></i> Withdraw Amount
+                    </button>
+                    <p class="mt-2 text-xs text-gray-500">
+                        Available Withdrawable: ₹{{ number_format((float) (optional($user->wallet)->withdrawable_balance ?? 0), 2) }}
+                    </p>
+                @endif
             </div>
         </div>
     </div>
@@ -94,6 +102,12 @@
                     <p class="text-gray-500">Balance</p>
                     <p class="text-xl font-bold text-primary-700">₹{{ number_format(optional($user->wallet)->balance ?? 0, 2) }}</p>
                 </div>
+                @if($user->user_type === 'admin')
+                <div class="p-4 rounded-xl bg-yellow-50">
+                    <p class="text-gray-500">Withdrawable balance</p>
+                    <p class="text-xl font-bold text-yellow-700">₹{{ number_format(optional($user->wallet)->withdrawable_balance ?? 0, 2) }}</p>
+                </div>
+                @endif
                 <div class="p-4 rounded-xl bg-green-50">
                     <p class="text-gray-500">Total Deposits</p>
                     <p class="text-xl font-bold text-green-700">₹{{ number_format(optional($user->wallet)->total_deposited ?? 0, 2) }}</p>
@@ -102,6 +116,8 @@
                     <p class="text-gray-500">Total Withdrawals</p>
                     <p class="text-xl font-bold text-yellow-700">₹{{ number_format(optional($user->wallet)->total_withdrawn ?? 0, 2) }}</p>
                 </div>
+
+               
                 <div class="p-4 rounded-xl bg-blue-50">
                     <p class="text-gray-500">Commission</p>
                     <p class="text-xl font-bold text-blue-700">₹{{ number_format($user->total_commission_earned ?? 0, 2) }}</p>
@@ -861,6 +877,43 @@
         </div>
     </div>
 </div>
+
+@if($user->user_type === 'admin')
+    <div id="withdrawModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" id="withdrawModalBackdrop"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-md rounded-2xl shadow-3d p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-lg font-semibold text-gray-800">Withdraw Amount</h4>
+                    <button type="button" id="closeWithdrawModalBtn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form method="POST" action="{{ route('admin.users.withdraw', $user->id) }}">
+                    @csrf
+                    <div>
+                        <label for="withdraw_amount" class="block text-sm font-medium text-gray-700 mb-2">Enter amount to withdraw</label>
+                        <input
+                            type="number"
+                            name="amount"
+                            id="withdraw_amount"
+                            min="1"
+                            step="0.01"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            placeholder="e.g. 1000"
+                        >
+                        <p class="mt-2 text-xs text-gray-500">Available: ₹{{ number_format((float) (optional($user->wallet)->withdrawable_balance ?? 0), 2) }}</p>
+                    </div>
+                    <div class="mt-5 flex justify-end gap-2">
+                        <button type="button" id="cancelWithdrawModalBtn" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700">Cancel</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">Confirm Withdraw</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection
 
 @push('scripts')
@@ -1024,6 +1077,33 @@
         const overviewTab = document.querySelector('#tab-overview');
         if (overviewTab) {
             overviewTab.classList.remove('hidden');
+        }
+
+        const withdrawModal = document.getElementById('withdrawModal');
+        const openWithdrawModalBtn = document.getElementById('openWithdrawModalBtn');
+        const closeWithdrawModalBtn = document.getElementById('closeWithdrawModalBtn');
+        const cancelWithdrawModalBtn = document.getElementById('cancelWithdrawModalBtn');
+        const withdrawModalBackdrop = document.getElementById('withdrawModalBackdrop');
+
+        const hideWithdrawModal = () => {
+            if (withdrawModal) {
+                withdrawModal.classList.add('hidden');
+            }
+        };
+
+        if (openWithdrawModalBtn && withdrawModal) {
+            openWithdrawModalBtn.addEventListener('click', function () {
+                withdrawModal.classList.remove('hidden');
+            });
+        }
+        if (closeWithdrawModalBtn) {
+            closeWithdrawModalBtn.addEventListener('click', hideWithdrawModal);
+        }
+        if (cancelWithdrawModalBtn) {
+            cancelWithdrawModalBtn.addEventListener('click', hideWithdrawModal);
+        }
+        if (withdrawModalBackdrop) {
+            withdrawModalBackdrop.addEventListener('click', hideWithdrawModal);
         }
     });
     function updateReferralCode(userId) {
