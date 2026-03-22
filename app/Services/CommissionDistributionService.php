@@ -776,7 +776,7 @@ class CommissionDistributionService
                 } else {
                     $description .= " - Sale #{$sale->id}";
                 }
-                
+               
                 $payload = [
                     'user_id' => $adminUserId,
                     'transaction_id' => $transactionId,
@@ -797,10 +797,14 @@ class CommissionDistributionService
                     ]),
                     'updated_at' => now(),
                 ];
+
+               
                 if ($existingPending) {
                     DB::table('transactions')->where('id', $existingPending->id)->update($payload);
                 } else {
                     $payload['created_at'] = now();
+
+                   
                     DB::table('transactions')->insert($payload);
                 }
             }

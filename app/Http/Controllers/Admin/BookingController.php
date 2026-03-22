@@ -184,20 +184,23 @@ class BookingController extends Controller
                 // Mark pending commission transaction as completed (avoid duplicate entries)
                 $pendingTx = DB::table('transactions')
                     ->where('user_id', $userId)
+                    ->where('user_id', '!=', 1)
                     ->where('type', 'commission')
                     ->where('status', 'pending')
                     ->where('reference_id', $booking->id)
                     ->orderBy('id', 'asc')
                     ->first();
 
-                $adminPendingTx = DB::table('transactions')
+               $adminPendingTx = DB::table('transactions')
                     ->where('user_id', 1)
                     ->where('type', 'commission')
                     ->where('status', 'pending')
                     ->where('reference_id', $booking->id)
+                    ->where('metadata->source', 'remaining_pool_pending')
                     ->orderBy('id', 'asc')
                     ->first();
 
+              
                 $project = $booking->plot && $booking->plot->project ? $booking->plot->project : null;
                 $plot = $booking->plot;
                 $desc = "Deal done – commission credited (Booking #{$booking->id})";
@@ -205,19 +208,25 @@ class BookingController extends Controller
                     $desc .= " – {$project->name}, {$plot->type} {$plot->plot_number}";
                 }
 
+
+                if ($adminPendingTx) {
+                    $updated = DB::table('transactions')
+                        ->where('id', $adminPendingTx->id)
+                        ->update([
+                            'status' => 'completed',
+                            'processed_by' => auth()->id(),
+                            'processed_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                
+                    \Log::info('Admin TX updated', [
+                        'id' => $adminPendingTx->id,
+                        'updated' => $updated
+                    ]);
+                }
+
                 if ($pendingTx) {
                     DB::table('transactions')->where('id', $pendingTx->id)->update([
-                        'status' => 'completed',
-                        'amount' => $finalAmount,
-                        'balance_before' => $withdrawableBefore,
-                        'balance_after' => $withdrawableAfter,
-                        'description' => $desc,
-                        'processed_by' => auth()->id(),
-                        'processed_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                } else if ($adminPendingTx) {
-                    DB::table('transactions')->where('id', $adminPendingTx->id)->update([
                         'status' => 'completed',
                         'amount' => $finalAmount,
                         'balance_before' => $withdrawableBefore,

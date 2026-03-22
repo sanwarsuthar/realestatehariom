@@ -75,8 +75,8 @@
                     @if($paymentRequest->payment_screenshot)
                     <div class="mt-3">
                         <span class="text-gray-600 block mb-2">Payment Screenshot:</span>
-                        <a href="{{ asset('storage/' . $paymentRequest->payment_screenshot) }}" target="_blank" class="inline-block">
-                            <img src="{{ asset('storage/' . $paymentRequest->payment_screenshot) }}" 
+                        <a href="{{ asset('storage/app/public/' . $paymentRequest->payment_screenshot) }}" target="_blank" class="inline-block">
+                            <img src="{{ asset('storage/app/public/' . $paymentRequest->payment_screenshot) }}" 
                                  alt="Payment Screenshot" 
                                  class="max-w-md h-auto border rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                         </a>
