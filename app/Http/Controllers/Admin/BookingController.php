@@ -172,12 +172,14 @@ class BookingController extends Controller
                 $withdrawableBefore = (float)($wallet->withdrawable_balance ?? 0);
                 $withdrawableAfter = $withdrawableBefore + $finalAmount;
 
+                if($userId != 1){
                 // Credit broker wallet balance ONLY now (Deal Done)
-                DB::table('wallets')->where('user_id', $userId)->increment('balance', $finalAmount);
-                DB::table('wallets')->where('user_id', $userId)->increment('withdrawable_balance', $finalAmount);
-                DB::table('wallets')->where('user_id', $userId)->increment('main_balance', $finalAmount);
-                DB::table('wallets')->where('user_id', $userId)->increment('total_earned', $finalAmount);
+                    DB::table('wallets')->where('user_id', $userId)->increment('balance', $finalAmount);
+                    DB::table('wallets')->where('user_id', $userId)->increment('withdrawable_balance', $finalAmount);
+                    DB::table('wallets')->where('user_id', $userId)->increment('main_balance', $finalAmount);
+                    DB::table('wallets')->where('user_id', $userId)->increment('total_earned', $finalAmount);
 
+                }
                 // Update user's total commission earned now (finalized)
                 DB::table('users')->where('id', $userId)->increment('total_commission_earned', $finalAmount);
 
@@ -210,12 +212,21 @@ class BookingController extends Controller
 
 
                 if ($adminPendingTx) {
+
+                    $totalFinalAmount = $finalAmount + $adminPendingTx->amount;
+
+                    DB::table('wallets')->where('user_id', 1)->increment('balance', $finalAmount);
+                    DB::table('wallets')->where('user_id', 1)->increment('withdrawable_balance', $finalAmount);
+                    DB::table('wallets')->where('user_id', 1)->increment('main_balance', $finalAmount);
+                    DB::table('wallets')->where('user_id', 1)->increment('total_earned', $finalAmount);
+
                     $updated = DB::table('transactions')
                         ->where('id', $adminPendingTx->id)
                         ->update([
                             'status' => 'completed',
                             'processed_by' => auth()->id(),
                             'processed_at' => now(),
+                            'amount' => $totalFinalAmount,
                             'updated_at' => now(),
                         ]);
                 
@@ -237,27 +248,30 @@ class BookingController extends Controller
                         'updated_at' => now(),
                     ]);
                 } else {
-                    // Fallback (older data): create a single completed transaction
-                    $txId = 'DEAL' . strtoupper(Str::random(8)) . time();
-                    while (DB::table('transactions')->where('transaction_id', $txId)->exists()) {
-                        $txId = 'DEAL' . strtoupper(Str::random(8)) . time() . rand(100, 999);
+                    if($userId != 1){
+                        // Fallback (older data): create a single completed transaction
+                        $txId = 'DEAL' . strtoupper(Str::random(8)) . time();
+                        while (DB::table('transactions')->where('transaction_id', $txId)->exists()) {
+                            $txId = 'DEAL' . strtoupper(Str::random(8)) . time() . rand(100, 999);
+                        }
+                        DB::table('transactions')->insert([
+                            'user_id' => $userId,
+                            'transaction_id' => $txId,
+                            'type' => 'commission',
+                            'status' => 'completed',
+                            'amount' => $finalAmount,
+                            'balance_before' => $withdrawableBefore,
+                            'balance_after' => $withdrawableAfter,
+                            'description' => $desc,
+                            'reference_id' => $booking->id,
+                            'metadata' => json_encode(['sale_id' => $booking->id, 'source' => 'deal_done_finalize', 'deal_done_at' => now()->toIso8601String()]),
+                            'processed_by' => auth()->id(),
+                            'processed_at' => now(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     }
-                    DB::table('transactions')->insert([
-                        'user_id' => $userId,
-                        'transaction_id' => $txId,
-                        'type' => 'commission',
-                        'status' => 'completed',
-                        'amount' => $finalAmount,
-                        'balance_before' => $withdrawableBefore,
-                        'balance_after' => $withdrawableAfter,
-                        'description' => $desc,
-                        'reference_id' => $booking->id,
-                        'metadata' => json_encode(['sale_id' => $booking->id, 'source' => 'deal_done_finalize', 'deal_done_at' => now()->toIso8601String()]),
-                        'processed_by' => auth()->id(),
-                        'processed_at' => now(),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    
                 }
 
                 // Keep release row consistent (full release on deal done)
