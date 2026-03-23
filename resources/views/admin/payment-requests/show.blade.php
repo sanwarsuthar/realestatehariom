@@ -193,7 +193,7 @@
                         <span class="text-gray-700">Commission Rate ({{ $brokerSlabName }}):</span>
                         <span class="font-semibold text-gray-800">₹{{ number_format($fixedAmountPerUnit, 2) }} / {{ $measurementUnit }}</span>
                     </div>
-                    @if(isset($progressiveBreakdown) && is_array($progressiveBreakdown) && count($progressiveBreakdown) > 0)
+                    @if(isset($progressiveBreakdown) && is_array($progressiveBreakdown) && count($progressiveBreakdown) > 0 &&   $paymentRequest->status == 'pending')
                         <!-- Progressive Commission Breakdown -->
                         <div class="mt-4 bg-white rounded-lg p-4 border border-purple-200">
                             <h5 class="font-semibold text-purple-900 mb-3">

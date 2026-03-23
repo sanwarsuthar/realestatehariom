@@ -212,13 +212,10 @@ class BookingController extends Controller
 
 
                 if ($adminPendingTx) {
-
-                    $totalFinalAmount = $finalAmount + $adminPendingTx->amount;
-
-                    DB::table('wallets')->where('user_id', 1)->increment('balance', $finalAmount);
-                    DB::table('wallets')->where('user_id', 1)->increment('withdrawable_balance', $finalAmount);
-                    DB::table('wallets')->where('user_id', 1)->increment('main_balance', $finalAmount);
-                    DB::table('wallets')->where('user_id', 1)->increment('total_earned', $finalAmount);
+                    DB::table('wallets')->where('user_id', 1)->increment('balance', $adminPendingTx->amount);
+                    DB::table('wallets')->where('user_id', 1)->increment('withdrawable_balance', $adminPendingTx->amount);
+                    DB::table('wallets')->where('user_id', 1)->increment('main_balance', $adminPendingTx->amount);
+                    DB::table('wallets')->where('user_id', 1)->increment('total_earned', $adminPendingTx->amount);
 
                     $updated = DB::table('transactions')
                         ->where('id', $adminPendingTx->id)
@@ -226,7 +223,6 @@ class BookingController extends Controller
                             'status' => 'completed',
                             'processed_by' => auth()->id(),
                             'processed_at' => now(),
-                            'amount' => $totalFinalAmount,
                             'updated_at' => now(),
                         ]);
                 
@@ -248,7 +244,6 @@ class BookingController extends Controller
                         'updated_at' => now(),
                     ]);
                 } else {
-                    if($userId != 1){
                         // Fallback (older data): create a single completed transaction
                         $txId = 'DEAL' . strtoupper(Str::random(8)) . time();
                         while (DB::table('transactions')->where('transaction_id', $txId)->exists()) {
@@ -270,7 +265,6 @@ class BookingController extends Controller
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
-                    }
                     
                 }
 

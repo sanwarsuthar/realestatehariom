@@ -391,6 +391,8 @@ class PaymentRequestController extends Controller
                 $plot->type ?? 'plot'
             );
         }
+        
+          
        
         return view('admin.payment-requests.show', compact(
             'paymentRequest',

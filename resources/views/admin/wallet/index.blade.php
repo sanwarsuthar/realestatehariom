@@ -184,40 +184,6 @@
                                 {{ ucfirst($withdrawal->status) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm">
-                            @if(!empty($metadata['bank_account_number']) || !empty($metadata['bank_name']))
-                                <div class="space-y-1">
-                                    <div class="font-semibold text-gray-900">
-                                        <i class="fas fa-university mr-1 text-primary-600"></i>
-                                        {{ $metadata['bank_name'] ?? 'N/A' }}
-                                    </div>
-                                    <div class="text-gray-600">
-                                        <span class="font-medium">A/C:</span> {{ $metadata['bank_account_number'] ?? 'N/A' }}
-                                    </div>
-                                    <div class="text-gray-600">
-                                        <span class="font-medium">Holder:</span> {{ $metadata['account_holder_name'] ?? 'N/A' }}
-                                    </div>
-                                    <div class="text-gray-600">
-                                        <span class="font-medium">IFSC:</span> {{ $metadata['ifsc_code'] ?? 'N/A' }}
-                                    </div>
-                                    @if(!empty($metadata['branch_location']))
-                                    <div class="text-gray-600 text-xs">
-                                        <span class="font-medium">Branch:</span> {{ $metadata['branch_location'] }}
-                                    </div>
-                                    @endif
-                                    @if(!empty($metadata['upi_id']))
-                                    <div class="text-gray-600 text-xs">
-                                        <span class="font-medium">UPI:</span> {{ $metadata['upi_id'] }}
-                                    </div>
-                                    @endif
-                                    <button onclick="showWithdrawalDetails({{ $withdrawal->id }})" class="text-primary-600 hover:text-primary-900 text-xs mt-1 underline">
-                                        <i class="fas fa-eye mr-1"></i>View Full Details
-                                    </button>
-                                </div>
-                            @else
-                                <span class="text-gray-400">No bank details</span>
-                            @endif
-                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             @if($withdrawal->status === 'pending')
                             <div class="flex space-x-2">
