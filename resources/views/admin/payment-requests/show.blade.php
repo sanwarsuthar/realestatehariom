@@ -193,7 +193,7 @@
                         <span class="text-gray-700">Commission Rate ({{ $brokerSlabName }}):</span>
                         <span class="font-semibold text-gray-800">₹{{ number_format($fixedAmountPerUnit, 2) }} / {{ $measurementUnit }}</span>
                     </div>
-                    @if(isset($progressiveBreakdown) && is_array($progressiveBreakdown) && count($progressiveBreakdown) > 0 &&   $paymentRequest->status == 'pending')
+                    @if(isset($progressiveBreakdown) && is_array($progressiveBreakdown) && count($progressiveBreakdown) > 0)
                         <!-- Progressive Commission Breakdown -->
                         <div class="mt-4 bg-white rounded-lg p-4 border border-purple-200">
                             <h5 class="font-semibold text-purple-900 mb-3">
@@ -226,7 +226,7 @@
                     @endif
                     <div class="bg-purple-50 rounded-lg p-4 mt-3 border-2 border-purple-300">
                         <div class="flex justify-between items-center">
-                            <span class="text-purple-900 font-bold text-lg">Total Commission Earned:</span>
+                            <span class="text-purple-900 font-bold text-lg">Total Progressive Commission:</span>
                             <span class="text-3xl font-bold text-purple-700">
                                 ₹{{ number_format($brokerCommission, 2) }}
                             </span>
@@ -240,6 +240,20 @@
                             <div class="mt-2 text-sm text-purple-700">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 Formula: {{ number_format($plotSize, 2) }} {{ $measurementUnit }} × ₹{{ number_format($fixedAmountPerUnit, 2) }} = ₹{{ number_format($brokerCommission, 2) }}
+                            </div>
+                        @endif
+
+                        @if($paymentRequest->status === 'approved' && ($earnedCommissionTotal ?? 0) > 0)
+                            <div class="mt-4 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-indigo-900 font-bold">Earned Commission (Released So Far):</span>
+                                    <span class="text-3xl font-bold text-indigo-700">
+                                        ₹{{ number_format($earnedCommissionReleased ?? 0, 2) }}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-indigo-700 mt-2">
+                                    Released {{ number_format($earnedCommissionPercent ?? 0, 2) }}% of total ₹{{ number_format($earnedCommissionTotal, 2) }}
+                                </div>
                             </div>
                         @endif
                     </div>

@@ -8,6 +8,7 @@ use App\Models\PaymentMethod;
 use App\Models\Sale;
 use App\Models\Plot;
 use App\Models\PropertyType;
+use App\Models\SaleCommissionRelease;
 use App\Services\CommissionDistributionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -160,6 +161,9 @@ class PaymentRequestController extends Controller
             // Distribute commissions: Main (projected) + Gross (proportional release)
             $commissionService = new CommissionDistributionService();
             $commissionDistribution = $commissionService->distributeCommission($sale, $project, $user);
+            // Immediately release gross/proportional commission based on total approved amount so far.
+            // (For instalments later, this is already handled in the `plot->status === 'booked'` branch.)
+            $commissionService->releaseProportionalCommission($sale);
 
             DB::commit();
 
@@ -245,6 +249,14 @@ class PaymentRequestController extends Controller
         $userSlab = null;
         $user = $paymentRequest->user;
         $propertyTypeModel = null;
+
+        $earnedCommissionReleased = 0;
+        $earnedCommissionTotal = 0;
+        $earnedCommissionPercent = 0;
+
+        // When this request is already approved, sale_id exists and the current sale will be included
+        // in "total area sold" calculations unless we explicitly exclude it.
+        $excludeSaleIdForProgressive = $paymentRequest->sale_id ? (int) $paymentRequest->sale_id : null;
         
         if ($plot && $plotSize > 0) {
           
@@ -320,7 +332,12 @@ class PaymentRequestController extends Controller
                     
                     // Get total volume sold before this sale (for this property type)
                     // Include team volume (own sales + team sales) for accurate slab calculation
-                    $totalVolumeBeforeSale = $commissionService->calculateTotalAreaSoldForPropertyType($user, $propertyTypeModel, null, true);
+                    $totalVolumeBeforeSale = $commissionService->calculateTotalAreaSoldForPropertyType(
+                        $user,
+                        $propertyTypeModel,
+                        $excludeSaleIdForProgressive,
+                        true
+                    );
                   
                         // Calculate progressive commission breakdown with allocated amount
                     $progressiveCommission = $commissionService->calculateProgressiveCommission(
@@ -382,7 +399,7 @@ class PaymentRequestController extends Controller
         // Preview commission distribution (for display only, before approval)
         $commissionPreview = [];
         $user = $paymentRequest->user;
-        if ($plot && $plotSize > 0 && $user && isset($propertyTypeModel) && $allocatedAmountForDisplay > 0) {
+        if ($paymentRequest->status === 'pending' && $plot && $plotSize > 0 && $user && isset($propertyTypeModel) && $allocatedAmountForDisplay > 0) {
             $commissionService = new CommissionDistributionService();
             $commissionPreview = $commissionService->previewCommissionDistribution(
                 $user,
@@ -390,6 +407,22 @@ class PaymentRequestController extends Controller
                 $plotSize,
                 $plot->type ?? 'plot'
             );
+        }
+
+        // Earned commission (released to wallets) so far for the approved instalment chain.
+        if ($paymentRequest->status === 'approved' && $paymentRequest->sale_id) {
+            $releaseRow = SaleCommissionRelease::query()
+                ->where('sale_id', $paymentRequest->sale_id)
+                ->where('user_id', $paymentRequest->user_id)
+                ->first();
+
+            if ($releaseRow) {
+                $earnedCommissionTotal = (float) ($releaseRow->total_commission ?? 0);
+                $earnedCommissionReleased = (float) ($releaseRow->released_amount ?? 0);
+                $earnedCommissionPercent = $earnedCommissionTotal > 0
+                    ? ($earnedCommissionReleased / $earnedCommissionTotal * 100)
+                    : 0;
+            }
         }
         
           
@@ -410,7 +443,10 @@ class PaymentRequestController extends Controller
             'totalVolumeBeforeSale',
             'userSlab',
             'allocatedAmountForDisplay',
-            'commissionPreview'
+            'commissionPreview',
+            'earnedCommissionReleased',
+            'earnedCommissionTotal',
+            'earnedCommissionPercent'
         ));
     }
 }

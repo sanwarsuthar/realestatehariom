@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -197,8 +198,12 @@ class WalletController extends Controller
      */
     public function requestWithdrawal(Request $request)
     {
+        // Read admin-configured limits (stored in `settings`)
+        $minWithdrawalAmount = (float) Setting::get('min_withdrawal_amount', 1000);
+        $maxWithdrawalAmount = (float) Setting::get('max_withdrawal_amount', 100000);
+
         $request->validate([
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|gt:0',
             'description' => 'nullable|string|max:500',
             'bank_account_number' => 'required|string|max:50',
             'bank_name' => 'required|string|max:100',
@@ -211,6 +216,7 @@ class WalletController extends Controller
 
         try {
             $user = $request->user();
+            $amount = (float) $request->amount;
             
             // Withdrawal only from Gross (released) wallet
             $wallet = Wallet::firstOrCreate(
@@ -226,7 +232,22 @@ class WalletController extends Controller
             );
 
             $withdrawable = (float) ($wallet->withdrawable_balance ?? 0);
-            if ($withdrawable < $request->amount) {
+
+            if ($amount < $minWithdrawalAmount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Minimum withdrawal amount is ₹' . number_format($minWithdrawalAmount, 2)
+                ], 400);
+            }
+
+            if ($amount > $maxWithdrawalAmount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maximum withdrawal amount is ₹' . number_format($maxWithdrawalAmount, 2)
+                ], 400);
+            }
+
+            if ($withdrawable < $amount) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Insufficient withdrawable balance. You can only withdraw from deals marked as done. Available: ₹' . number_format($withdrawable, 2)
@@ -252,7 +273,7 @@ class WalletController extends Controller
                 'transaction_id' => $transactionId,
                 'type' => 'withdrawal',
                 'status' => 'pending',
-                'amount' => $request->amount,
+                'amount' => $amount,
                 'balance_before' => $wallet->withdrawable_balance ?? 0,
                 'balance_after' => $wallet->withdrawable_balance ?? 0, // Will be updated on approval
                 'description' => $request->description ?? 'Withdrawal request',

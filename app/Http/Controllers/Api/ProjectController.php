@@ -155,12 +155,19 @@ class ProjectController extends Controller
                             'total_units' => $totalUnits,
                         ];
                     }
+
+                    $uniqueLocation = collect(explode(',',$project->location))
+                    ->map(fn($item) => trim($item))   // remove spaces
+                    ->unique()                        // remove duplicates
+                    ->implode(', ');
+
+
                     
                     return [
                     'id' => $project->id,
                     'name' => $project->name,
                     'description' => $project->description,
-                    'location' => $project->location,
+                    'location' => $uniqueLocation,
                     'city' => $project->city,
                     'state' => $project->state,
                     'type' => $project->type,
@@ -309,7 +316,7 @@ class ProjectController extends Controller
                 ->where('is_active', true)
                 ->select(['id', 'plot_number', 'type', 'size', 'price_per_unit', 'status', 'grid_batch_id', 'grid_batch_name'])
                 ->orderBy('grid_batch_id')
-                ->orderBy('plot_number')
+                ->orderByRaw("CAST(REPLACE(plot_number, 'Plot #', '') AS INTEGER)")
                 ->get()
                 ->map(function($plot) use ($projectBookingAmount) {
                     return [
